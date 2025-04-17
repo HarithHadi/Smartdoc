@@ -2,17 +2,25 @@
 import React, { useState } from "react";
 import { Input } from "./ui/input"
 import { Textarea } from "@/components/ui/textarea"
+import { Button } from "@/components/ui/button"
 
 
 // This component allows users to input code and generate documentation for it using the Groq API
 function GrChat() {
+  // The code input by the user
   const [code, setCode] = useState("");
+  // The geneated documentation
   const [doc, setDoc] = useState("");
+  // Wether the API requesst is in progress
   const [loading, setLoading] = useState(false);
+  // Any error messages from the API request
   const [error, setError] = useState("");
 
-  const API_KEY = import.meta.env.VITE_GROQ_API_KEY;
 
+  // API key for the Groq API
+  const API_KEY = import.meta.env.VITE_GROQ_API_KEY;
+  // This function sends a POST request to the Groq API with the input code and model parameters update the component state with 
+  // the generated documentation or any error messages
   const generateDocs = async () => {
     if (!code.trim()) return;
 
@@ -23,6 +31,9 @@ function GrChat() {
     try {
       const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
         method: "POST",
+        // Headers can be found in the groq models website. here u can find formats that need to be followed to use the model
+        // -H "Authorization: Bearer $GROQ_API_KEY" \
+        // -H "Content-Type: application/json" \
         headers: {
           "Authorization": `Bearer ${API_KEY}`,
           "Content-Type": "application/json",
@@ -36,15 +47,17 @@ function GrChat() {
             },
             {
               role: "user",
-              content: `Can you generate documentation for the following code?\n\n${code}`,
+              content: `Generate a Markdown summary explaining what the code does, including its components, state variables, and functions\n\n${code}`,
             },
           ],
           temperature: 0.5,
         }),
       });
 
+      // This waits for the response of the api and puts it into the variable data
       const data = await response.json();
 
+      // For errors
       if (data.error) {
         setError(data.error.message || "Unknown error.");
       } else {
@@ -59,7 +72,9 @@ function GrChat() {
 
   return (
     <div style={{ maxWidth: "800px", margin: "0 auto", padding: "1rem" }}>
-      <h1>Groq AI Code Documentation Generator</h1>
+      <h1 className="mb-4 text-4xl font-extrabold tracking-tight text-gray-900 md:text-5xl lg:text-6xl dark:text-white">
+          SmartDoc 📋
+        </h1>
 
       <Textarea
         value={code}
@@ -70,13 +85,13 @@ function GrChat() {
       />
       
 
-      <button onClick={generateDocs} disabled={loading}>
+      <Button onClick={generateDocs} disabled={loading}>
         {loading ? "Generating..." : "Generate Docs"}
-      </button>
+      </Button>
 
       {error && <p style={{ color: "red" }}>{error}</p>}
-
-      <h2>Generated Documentation:</h2>
+      
+      <h2 className="font-extrabold text-lef text-2xl " >Generated Documentation:</h2>
       <pre style={{ background: "#f4f4f4", padding: "1rem", color: "#000", fontSize: "16px", width: "100%", height: "300px", overflow: "auto" }}>
         {doc}
       </pre>
