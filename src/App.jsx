@@ -1,13 +1,15 @@
 
-
+//saya suka
 import { useState } from "react";
 import "./App.css";
 import Chat from "./components/chat";
+import GrChat from "./components/grchat";
+
 
 
 function App() {
   return (
-    <Chat />
+    <GrChat />
   );
 }
 
