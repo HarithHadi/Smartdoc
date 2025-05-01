@@ -4,6 +4,7 @@ import { Input } from "./ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
+import Tesseract, { createWorker } from "tesseract.js";
 
 
 // This component allows users to input code and generate documentation for it using the Groq API
@@ -16,6 +17,9 @@ function GrChat() {
   const [loading, setLoading] = useState(false);
   // Any error messages from the API request
   const [error, setError] = useState("");
+
+  // Stores the screenshots from the user
+  const [image, setImage] = useState("");
 
 
   // API key for the Groq API
@@ -71,6 +75,29 @@ function GrChat() {
     setLoading(false);
   };
 
+  const handleOCR = async (file) =>{
+    setLoading(true);
+    try{
+      const result = await Tesseract.recognize(file,'eng', {
+        logger: m => console.log(m),
+        
+      });
+      setCode(result.data.text);
+    } catch (err) {
+      console.error("OCR Error:", err);
+      setDoc("Failed to read text from image")
+    }
+    setLoading(false);
+  }
+
+  const handleFileChange = (e) =>{
+    const file = e.target.files[0];
+    setImage(file);
+    if(file){
+      handleOCR(file);
+    }
+  }
+
   return (
     <div style={{ maxWidth: "800px", margin: "0 auto", paddingTop: "1rem" }}>
       
@@ -90,15 +117,53 @@ function GrChat() {
           <Textarea
             value={code}
             onChange={(e) => setCode(e.target.value)}
-            rows={10}
+            rows={8} // Reduced rows to make the box smaller
             placeholder="Paste your code here..."
             style={{ width: "100%", marginBottom: "1rem" }}
           />
         </div>
+        <div style={{paddingBottom: "1rem" ,alignItems : "center" }}>
+          <h5 className=" font-bold tracking-tight text-gray-900  dark:text-white" style={{padding : "0.5rem"}}>Or post a screenshot of ur code here</h5>
+          <Input 
+              type="file"
+              style={{
+                width: "200px", // Adjusted width to make the box smaller
+                height: "40px", // Adjusted height to make the box smaller
+                alignContent : "center",
+                boxSizing: "border-box",
+                cursor : "pointer",
+                margin: "0 auto", // Centers the input horizontally
+                display: "block"
+              }}
+              onChange={handleFileChange}
+              
+            />
+        </div>
+        
+        
         
         <div style={{paddingBottom: "1rem"}}>
-          <Button onClick={generateDocs} disabled={loading}>
+          <Button onClick={generateDocs} disabled={loading}
+          style={{
+              backgroundColor: "#000000",
+              color: "#FFFFFF",
+              padding: "10px 20px",
+              borderRadius: "5px",
+              cursor: "pointer",
+              transition: "background-color 0.3s, color 0.3s",
+          }}
+          onMouseEnter={(e) => {
+              e.target.style.backgroundColor = "#FFFFFF";
+              e.target.style.color = "#000000";
+          }}
+          onMouseLeave={(e) => {
+              e.target.style.backgroundColor = "#000000";
+              e.target.style.color = "#FFFFFF";
+          }}
+          >
+
             {loading ? "Generating..." : "Generate Docs"}
+
           </Button>
         </div>
         
@@ -106,7 +171,7 @@ function GrChat() {
           {error && <p style={{ color: "red" }}>{error}</p>}
           
           <h2 className="font-extrabold text-lef text-2xl" style={{paddingBottom : "1rem"}} >Generated Documentation:</h2>
-          <pre style={{ background: "#f4f4f4", padding: "1rem", color: "#000", fontSize: "16px", width: "100%", height: "300px", overflow: "auto" }}>
+          <pre style={{ background: "#f4f4f4", padding: "1rem", color: "#000", fontSize: "16px", width: "100%", height: "200px", overflow: "auto" ,textAlign: "left" }}>
             {doc}
           </pre>
         </div>
