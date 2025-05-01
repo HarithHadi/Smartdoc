@@ -3,6 +3,7 @@ import React, { useState } from "react";
 import { Input } from "./ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge"
 
 
 // This component allows users to input code and generate documentation for it using the Groq API
@@ -71,30 +72,52 @@ function GrChat() {
   };
 
   return (
-    <div style={{ maxWidth: "800px", margin: "0 auto", padding: "1rem" }}>
-      <h1 className="mb-4 text-4xl font-extrabold tracking-tight text-gray-900 md:text-5xl lg:text-6xl dark:text-white">
-          SmartDoc 📋
+    <div style={{ maxWidth: "800px", margin: "0 auto", paddingTop: "1rem" }}>
+      
+      <div style={{ paddingBottom : "3rem"}}>
+        <h1 className="mb-4 text-4xl font-extrabold tracking-tight text-gray-900 md:text-5xl lg:text-6xl dark:text-white">
+            SmartDoc 📋
         </h1>
 
-      <Textarea
-        value={code}
-        onChange={(e) => setCode(e.target.value)}
-        rows={10}
-        placeholder="Paste your code here..."
-        style={{ width: "100%", marginBottom: "1rem" }}
-      />
-      
+        <h5 className=" font-bold tracking-tight text-gray-900  dark:text-white">
+          Your all-in-one tool for generating documentation from your code. Paste your code below and let SmartDoc do the rest!
+        </h5>
 
-      <Button onClick={generateDocs} disabled={loading}>
-        {loading ? "Generating..." : "Generate Docs"}
-      </Button>
-
-      {error && <p style={{ color: "red" }}>{error}</p>}
+      </div>
       
-      <h2 className="font-extrabold text-lef text-2xl " >Generated Documentation:</h2>
-      <pre style={{ background: "#f4f4f4", padding: "1rem", color: "#000", fontSize: "16px", width: "100%", height: "300px", overflow: "auto" }}>
-        {doc}
-      </pre>
+      <div style={{padding: "1rem"}}>
+        <div style={{paddingBottom: "1rem"}}>
+          <Textarea
+            value={code}
+            onChange={(e) => setCode(e.target.value)}
+            rows={10}
+            placeholder="Paste your code here..."
+            style={{ width: "100%", marginBottom: "1rem" }}
+          />
+        </div>
+        
+        <div style={{paddingBottom: "1rem"}}>
+          <Button onClick={generateDocs} disabled={loading}>
+            {loading ? "Generating..." : "Generate Docs"}
+          </Button>
+        </div>
+        
+        <div>
+          {error && <p style={{ color: "red" }}>{error}</p>}
+          
+          <h2 className="font-extrabold text-lef text-2xl" style={{paddingBottom : "1rem"}} >Generated Documentation:</h2>
+          <pre style={{ background: "#f4f4f4", padding: "1rem", color: "#000", fontSize: "16px", width: "100%", height: "300px", overflow: "auto" }}>
+            {doc}
+          </pre>
+        </div>
+
+
+        
+
+      </div>
+
+
+      
     </div>
   );
 }
