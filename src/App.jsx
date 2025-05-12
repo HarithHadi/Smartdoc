@@ -3,11 +3,15 @@
 import { useState } from "react";
 import "./App.css";
 import GrChat from "./components/grchat";
+import Navbar from "./components/Navbar"
 
 
 function App() {
   return (
-    <GrChat />
+    <>
+      <Navbar/>
+      <GrChat />
+    </>
   );
 }
 
