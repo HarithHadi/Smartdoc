@@ -6,12 +6,7 @@ function Chat() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  const API_KEY = import.meta.env.VITE_OPENAI_API_KEY;
-
-  const APIBody = {
-     "model": "gpt-4o",
-     "input": "Write a one-sentence bedtime story about a unicorn."
-  }
+  const API_KEY = import.meta.env.VITE_HUGGINGFACE_API_KEY;
 
   const generateDocs = async () => {
     if (!code.trim()) return;
@@ -22,17 +17,14 @@ function Chat() {
 
     try {
       const response = await fetch(
-        "https://api.openai.com/v1/response",
+        "https://api-inference.huggingface.co/models/Salesforce/codet5-small",
         {
           method: "POST",
-          // -H "Content-Type: application/json" \
-          // -H "Authorization: Bearer $OPENAI_API_KEY" \
           headers: {
             Authorization: `Bearer ${API_KEY}`,
             "Content-Type": "application/json",
           },
-          // body: JSON.stringify({ inputs:`summarize: ${code}`}),
-          body: JSON.stringify(APIBody)
+          body: JSON.stringify({ inputs:`summarize: ${code}`}),
         }
       );
 
@@ -51,7 +43,6 @@ function Chat() {
 
     setLoading(false);
   };
-  console.log(code);
 
   return (
     <div style={{ maxWidth: "800px", margin: "0 auto", padding: "1rem" }}>
