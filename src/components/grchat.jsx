@@ -1,5 +1,5 @@
 // src/components/GrChat.jsx
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Input } from "./ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Button } from "@/components/ui/button"
@@ -23,6 +23,10 @@ function GrChat() {
 
   // Stores the screenshots from the user
   const [image, setImage] = useState("");
+
+    useEffect(() => {
+    console.log("Updated doc:", doc);
+  }, [doc]);
 
 
   // API key for the Groq API
@@ -68,9 +72,10 @@ function GrChat() {
       // For errors
       if (data.error) {
         setError(data.error.message || "Unknown error.");
-      } else {
+      } else { //If the API returns a choices array, like OpenAI/Groq typically does.
+        //Takes the first message in the choices array, then get its content. If nothing founf sets to "No Documentation Generated"
         setDoc(data.choices?.[0]?.message?.content || "No documentation generated.");
-        console.log(doc);
+        
       }
     } catch (err) {
       setError("Failed to connect to Groq API.");
@@ -197,9 +202,14 @@ function GrChat() {
                 <ReactMarkdown  
                   remarkPlugins={[remarkGfm]}
                     components={{
-                      h1: ({ node, ...props }) => <h1 style={{ fontSize: '2rem', fontWeight: 'bold' }} {...props} />,
-                      h2: ({ node, ...props }) => <h2 style={{ fontSize: '1.5rem', fontWeight: 'bold' }} {...props} />,
+                      h1: ({ node, ...props }) => <h1 style={{ fontSize: '2rem', fontWeight: 'bold', marginTop: '2rem', marginBottom: '1rem' }} {...props} />,
+                      h2: ({ node, ...props }) => <h2 style={{ fontSize: '1.5rem', fontWeight: 'bold', marginTop: '1.5rem', marginBottom: '0.75rem' }} {...props} />,
+                      h3: ({ node, ...props }) => <h2 style={{ fontSize: '1.25rem', fontWeight: 'bold', marginTop: '1.0rem', marginBottom: '0.75rem' }} {...props} />,
+                      h4: ({ node, ...props }) => <h2 style={{ fontWeight: 'bold', marginTop: '1.0rem', marginBottom: '0.75rem' }} {...props} />,
+                      ul: ({ node, ...props }) => <ul style={{ paddingLeft: '1.5rem',marginTop: '0.5rem', marginBottom: '0.75rem'}}{...props}/>,
+                      li: ({ node, ...props }) => <li style={{ marginBottom: "0.5rem", listStyleType: "disc" }} {...props} />,
                       p: ({ node, ...props }) => <p style={{ marginBottom: '1rem' }} {...props} />,
+                      
                     }}
                   >{doc}</ReactMarkdown>
 
