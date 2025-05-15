@@ -6,6 +6,8 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import Tesseract, { createWorker } from "tesseract.js";
 import html2pdf from 'html2pdf.js'
+import ReactMarkdown from 'react-markdown'
+import remarkGfm from 'remark-gfm'
 
 
 // This component allows users to input code and generate documentation for it using the Groq API
@@ -68,6 +70,7 @@ function GrChat() {
         setError(data.error.message || "Unknown error.");
       } else {
         setDoc(data.choices?.[0]?.message?.content || "No documentation generated.");
+        console.log(doc);
       }
     } catch (err) {
       setError("Failed to connect to Groq API.");
@@ -173,41 +176,63 @@ function GrChat() {
         <div>
           {error && <p style={{ color: "red" }}>{error}</p>}
           
-          <h2 className="font-extrabold text-lef text-2xl" style={{paddingBottom : "1rem"}} >Generated Documentation:</h2>
-          <pre style={{ background: "#f4f4f4", padding: "1rem", color: "#000", fontSize: "16px", width: "100%", height: "200px", overflow: "auto" ,textAlign: "left" }}>
-            {doc}
-          </pre>
+          
+          
+          {doc && (
+            <>
+              <h2 className="font-extrabold text-lef text-2xl" style={{paddingBottom : "1rem"}} >Generated Documentation:</h2>
+              <div
+                className="prose max-w-none"
+                style={{
+                  background: "#f4f4f4",
+                  padding: "1rem",
+                  color: "#000",
+                  fontSize: "16px",
+                  width: "100%",
+                  overflow: "auto",
+                  textAlign: "left",
+                  borderRadius: "5px"
+                }}
+              >
+                <ReactMarkdown  
+                  remarkPlugins={[remarkGfm]}
+                    components={{
+                      h1: ({ node, ...props }) => <h1 style={{ fontSize: '2rem', fontWeight: 'bold' }} {...props} />,
+                      h2: ({ node, ...props }) => <h2 style={{ fontSize: '1.5rem', fontWeight: 'bold' }} {...props} />,
+                      p: ({ node, ...props }) => <p style={{ marginBottom: '1rem' }} {...props} />,
+                    }}
+                  >{doc}</ReactMarkdown>
+
+              </div>
+              <div style={{ padding:"1rem"}}>
+                <Button 
+                        style={{
+                          backgroundColor: "#000000",
+                          color: "#FFFFFF",
+                          padding: "10px 20px",
+                          borderRadius: "5px",
+                          cursor: "pointer",
+                          transition: "background-color 0.3s, color 0.3s",
+                        }}
+                        onMouseEnter={(e) => {
+                            e.target.style.backgroundColor = "#FFFFFF";
+                            e.target.style.color = "#000000";
+                        }}
+                        onMouseLeave={(e) => {
+                            e.target.style.backgroundColor = "#000000";
+                            e.target.style.color = "#FFFFFF";
+                        }}
+                        >
+                            Download Documentation
+                </Button>
+
+              </div>
+              
+            </>
+          )}
 
         </div>
-        
-
-
-        
-
-      </div>
-      <Button 
-      style={{
-        backgroundColor: "#000000",
-        color: "#FFFFFF",
-        padding: "10px 20px",
-        borderRadius: "5px",
-        cursor: "pointer",
-        transition: "background-color 0.3s, color 0.3s",
-    }}
-        onMouseEnter={(e) => {
-          e.target.style.backgroundColor = "#FFFFFF";
-          e.target.style.color = "#000000";
-      }}
-      onMouseLeave={(e) => {
-          e.target.style.backgroundColor = "#000000";
-          e.target.style.color = "#FFFFFF";
-      }}
-      >
-          Download Documentation
-      </Button>
-
-
-      
+      </div> 
     </div>
   );
 }
