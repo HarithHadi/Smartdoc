@@ -5,6 +5,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import Tesseract, { createWorker } from "tesseract.js";
+import html2pdf from 'html2pdf.js'
 
 
 // This component allows users to input code and generate documentation for it using the Groq API
@@ -98,8 +99,10 @@ function GrChat() {
     }
   }
 
+
+
   return (
-    <div style={{ maxWidth: "800px", margin: "0 auto", paddingTop: "1rem" }}>
+    <div id="pre" style={{ maxWidth: "800px", margin: "0 auto", paddingTop: "1rem" }}>
       
       <div style={{ paddingBottom : "3rem"}}>
         <h1 className="mb-4 text-4xl font-extrabold tracking-tight text-gray-900 md:text-5xl lg:text-6xl dark:text-white">
@@ -174,12 +177,34 @@ function GrChat() {
           <pre style={{ background: "#f4f4f4", padding: "1rem", color: "#000", fontSize: "16px", width: "100%", height: "200px", overflow: "auto" ,textAlign: "left" }}>
             {doc}
           </pre>
+
         </div>
+        
 
 
         
 
       </div>
+      <Button 
+      style={{
+        backgroundColor: "#000000",
+        color: "#FFFFFF",
+        padding: "10px 20px",
+        borderRadius: "5px",
+        cursor: "pointer",
+        transition: "background-color 0.3s, color 0.3s",
+    }}
+        onMouseEnter={(e) => {
+          e.target.style.backgroundColor = "#FFFFFF";
+          e.target.style.color = "#000000";
+      }}
+      onMouseLeave={(e) => {
+          e.target.style.backgroundColor = "#000000";
+          e.target.style.color = "#FFFFFF";
+      }}
+      >
+          Download Documentation
+      </Button>
 
 
       
