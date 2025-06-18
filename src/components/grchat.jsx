@@ -8,6 +8,7 @@ import Tesseract, { createWorker } from "tesseract.js";
 import html2pdf from 'html2pdf.js'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
+import { jsPDF } from "jspdf";
 
 
 // This component allows users to input code and generate documentation for it using the Groq API
@@ -106,6 +107,13 @@ function GrChat() {
       handleOCR(file);
     }
   }
+
+  const generatePdf = () => {
+  const docPDF = new jsPDF();
+  const lines = docPDF.splitTextToSize(doc, 180); // wrap at 180 units
+  docPDF.text(lines, 10, 10);
+  docPDF.save("documentation.pdf");
+};
 
 
 
@@ -216,6 +224,7 @@ function GrChat() {
               </div>
               <div style={{ padding:"1rem"}}>
                 <Button 
+                        onClick={generatePdf}
                         style={{
                           backgroundColor: "#000000",
                           color: "#FFFFFF",
