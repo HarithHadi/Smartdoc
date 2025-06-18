@@ -1,10 +1,14 @@
 // src/components/GrChat.jsx
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Input } from "./ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import Tesseract, { createWorker } from "tesseract.js";
+import html2pdf from 'html2pdf.js'
+import ReactMarkdown from 'react-markdown'
+import remarkGfm from 'remark-gfm'
+import { jsPDF } from "jspdf";
 
 
 // This component allows users to input code and generate documentation for it using the Groq API
@@ -20,6 +24,10 @@ function GrChat() {
 
   // Stores the screenshots from the user
   const [image, setImage] = useState("");
+
+    useEffect(() => {
+    console.log("Updated doc:", doc);
+  }, [doc]);
 
 
   // API key for the Groq API
@@ -65,8 +73,10 @@ function GrChat() {
       // For errors
       if (data.error) {
         setError(data.error.message || "Unknown error.");
-      } else {
+      } else { //If the API returns a choices array, like OpenAI/Groq typically does.
+        //Takes the first message in the choices array, then get its content. If nothing founf sets to "No Documentation Generated"
         setDoc(data.choices?.[0]?.message?.content || "No documentation generated.");
+        
       }
     } catch (err) {
       setError("Failed to connect to Groq API.");
@@ -98,8 +108,17 @@ function GrChat() {
     }
   }
 
+  const generatePdf = () => {
+  const docPDF = new jsPDF();
+  const lines = docPDF.splitTextToSize(doc, 180); // wrap at 180 units
+  docPDF.text(lines, 10, 10);
+  docPDF.save("documentation.pdf");
+};
+
+
+
   return (
-    <div style={{ maxWidth: "800px", margin: "0 auto", paddingTop: "1rem" }}>
+    <div id="pre" style={{ maxWidth: "800px", margin: "0 auto", paddingTop: "1rem" }}>
       
       <div style={{ paddingBottom : "3rem"}}>
         <h1 className="mb-4 text-4xl font-extrabold tracking-tight text-gray-900 md:text-5xl lg:text-6xl dark:text-white">
@@ -170,19 +189,69 @@ function GrChat() {
         <div>
           {error && <p style={{ color: "red" }}>{error}</p>}
           
-          <h2 className="font-extrabold text-lef text-2xl" style={{paddingBottom : "1rem"}} >Generated Documentation:</h2>
-          <pre style={{ background: "#f4f4f4", padding: "1rem", color: "#000", fontSize: "16px", width: "100%", height: "200px", overflow: "auto" ,textAlign: "left" }}>
-            {doc}
-          </pre>
+          
+          
+          {doc && (
+            <>
+              <h2 className="font-extrabold text-lef text-2xl" style={{paddingBottom : "1rem"}} >Generated Documentation:</h2>
+              <div
+                className="prose max-w-none"
+                style={{
+                  background: "#f4f4f4",
+                  padding: "1rem",
+                  color: "#000",
+                  fontSize: "16px",
+                  width: "100%",
+                  overflow: "auto",
+                  textAlign: "left",
+                  borderRadius: "5px"
+                }}
+              >
+                <ReactMarkdown  
+                  remarkPlugins={[remarkGfm]}
+                    components={{
+                      h1: ({ node, ...props }) => <h1 style={{ fontSize: '2rem', fontWeight: 'bold', marginTop: '2rem', marginBottom: '1rem' }} {...props} />,
+                      h2: ({ node, ...props }) => <h2 style={{ fontSize: '1.5rem', fontWeight: 'bold', marginTop: '1.5rem', marginBottom: '0.75rem' }} {...props} />,
+                      h3: ({ node, ...props }) => <h2 style={{ fontSize: '1.25rem', fontWeight: 'bold', marginTop: '1.0rem', marginBottom: '0.75rem' }} {...props} />,
+                      h4: ({ node, ...props }) => <h2 style={{ fontWeight: 'bold', marginTop: '1.0rem', marginBottom: '0.75rem' }} {...props} />,
+                      ul: ({ node, ...props }) => <ul style={{ paddingLeft: '1.5rem',marginTop: '0.5rem', marginBottom: '0.75rem'}}{...props}/>,
+                      li: ({ node, ...props }) => <li style={{ marginBottom: "0.5rem", listStyleType: "disc" }} {...props} />,
+                      p: ({ node, ...props }) => <p style={{ marginBottom: '1rem' }} {...props} />,
+                      
+                    }}
+                  >{doc}</ReactMarkdown>
+
+              </div>
+              <div style={{ padding:"1rem"}}>
+                <Button 
+                        onClick={generatePdf}
+                        style={{
+                          backgroundColor: "#000000",
+                          color: "#FFFFFF",
+                          padding: "10px 20px",
+                          borderRadius: "5px",
+                          cursor: "pointer",
+                          transition: "background-color 0.3s, color 0.3s",
+                        }}
+                        onMouseEnter={(e) => {
+                            e.target.style.backgroundColor = "#FFFFFF";
+                            e.target.style.color = "#000000";
+                        }}
+                        onMouseLeave={(e) => {
+                            e.target.style.backgroundColor = "#000000";
+                            e.target.style.color = "#FFFFFF";
+                        }}
+                        >
+                            Download Documentation
+                </Button>
+
+              </div>
+              
+            </>
+          )}
+
         </div>
-
-
-        
-
-      </div>
-
-
-      
+      </div> 
     </div>
   );
 }
