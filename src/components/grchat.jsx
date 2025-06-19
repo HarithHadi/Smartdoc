@@ -26,12 +26,15 @@ function GrChat() {
   // API key for the Groq API
   const API_KEY = import.meta.env.VITE_GROQ_API_KEY;
 
+
   const generateDocs = async () => {
+    // if input is empty
     if (!code.trim()){
       setError("Please enter your code or upload a screenshot")
       return
     };
-
+  
+  // Checks if the code is likely code.
   const isLikelyCode = /[{}();=]|(function|const|let|var|class|if|else|import|export)/.test(code);
 
   if (!isLikelyCode) {
