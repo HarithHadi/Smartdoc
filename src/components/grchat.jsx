@@ -47,6 +47,10 @@ function GrChat() {
     setDoc("");
 
     try {
+      // uncomment this to simulate timeout
+      // await new Promise((_, reject) =>
+      //   setTimeout(() => reject(new Error("Simulated timeout")), 5000)
+      // );
       const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
         method: "POST",
         headers: {
