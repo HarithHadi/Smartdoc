@@ -5,7 +5,6 @@ import { Textarea } from "@/components/ui/textarea"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import Tesseract, { createWorker } from "tesseract.js";
-import html2pdf from 'html2pdf.js'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import { jsPDF } from "jspdf";
@@ -28,7 +27,10 @@ function GrChat() {
   const API_KEY = import.meta.env.VITE_GROQ_API_KEY;
 
   const generateDocs = async () => {
-    if (!code.trim()) return;
+    if (!code.trim()){
+      setError("Please enter your code or upload a screenshot")
+      return
+    };
 
     setLoading(true);
     setError("");

@@ -55,6 +55,7 @@ export default function Navbar() {
         padding: "10px 20px",
       }}
     >
+      {/* <div>{user?.email}</div> */}
       <NavigationMenu
         className="bg-background text-foreground"
         style={{ display: "flex", justifyContent: "flex-end", gap: "20px" }}
