@@ -32,6 +32,13 @@ function GrChat() {
       return
     };
 
+  const isLikelyCode = /[{}();=]|(function|const|let|var|class|if|else|import|export)/.test(code);
+
+  if (!isLikelyCode) {
+    setError("Invalid code format.");
+    return;
+  }
+
     setLoading(true);
     setError("");
     setDoc("");
