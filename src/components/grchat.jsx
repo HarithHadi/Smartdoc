@@ -123,6 +123,8 @@ function GrChat() {
   //html2pdfpro
   const generatePdf = async () => {
   const element = document.getElementById("pdf-content");
+  const now = new Date();
+  const fileName = `SmartDoc-${now.toISOString().slice(0,10)}.pdf`;
 
   if (!element) {
     console.error("Element not found");
@@ -164,7 +166,7 @@ function GrChat() {
       }
     }
 
-    pdf.save("documentation.pdf");
+    pdf.save(fileName);
   } catch (error) {
     console.error("PDF generation failed:", error);
   }
