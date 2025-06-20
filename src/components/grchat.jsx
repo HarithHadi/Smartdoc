@@ -8,6 +8,7 @@ import Tesseract, { createWorker } from "tesseract.js";
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import { jsPDF } from "jspdf";
+import html2canvas from "html2canvas-pro";
 
 
 // This component allows users to input code and generate documentation for it using the Groq API
@@ -111,11 +112,62 @@ function GrChat() {
     }
   }
 
-  const generatePdf = () => {
-  const docPDF = new jsPDF();
-  const lines = docPDF.splitTextToSize(doc, 180); // wrap at 180 units
-  docPDF.text(lines, 10, 10);
-  docPDF.save("documentation.pdf");
+  //jsPDF function
+  // const generatePdf = () => {
+  // const docPDF = new jsPDF();
+  // const lines = docPDF.splitTextToSize(doc, 180); // wrap at 180 units
+  // docPDF.text(lines, 10, 10);
+  // docPDF.save("documentation.pdf");
+  // };
+
+  //html2pdfpro
+  const generatePdf = async () => {
+  const element = document.getElementById("pdf-content");
+
+  if (!element) {
+    console.error("Element not found");
+    return;
+  }
+
+  try {
+    const canvas = await html2canvas(element, {
+      useCORS: true,
+      allowTaint: true,
+      backgroundColor: "#ffffff",
+      logging: false
+    });
+
+    const imgData = canvas.toDataURL("image/png");
+    const pdf = new jsPDF("p", "mm", "a4");
+
+    // calculate width/height based on canvas size and PDF page size
+    const imgWidth = 210; // A4 width in mm
+    const pageHeight = 297; // A4 height in mm
+    const imgHeight = (canvas.height * imgWidth) / canvas.width;
+
+    let position = 0;
+
+    if (imgHeight < pageHeight) {
+      pdf.addImage(imgData, "PNG", 0, 0, imgWidth, imgHeight);
+    } else {
+      // For content taller than one page
+      let heightLeft = imgHeight;
+
+      while (heightLeft > 0) {
+        pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
+        heightLeft -= pageHeight;
+        position -= pageHeight;
+
+        if (heightLeft > 0) {
+          pdf.addPage();
+        }
+      }
+    }
+
+    pdf.save("documentation.pdf");
+  } catch (error) {
+    console.error("PDF generation failed:", error);
+  }
 };
 
 
@@ -207,6 +259,7 @@ function GrChat() {
                   textAlign: "left",
                   borderRadius: "5px"
                 }}
+                id="pdf-content"
               >
                 <ReactMarkdown  
                   remarkPlugins={[remarkGfm]}
@@ -220,7 +273,8 @@ function GrChat() {
                       p: ({ node, ...props }) => <p style={{ marginBottom: '1rem' }} {...props} />,
                       
                     }}
-                  >{doc}</ReactMarkdown>
+                  >{doc}
+                </ReactMarkdown>
 
               </div>
               <div style={{ padding:"1rem"}}>
