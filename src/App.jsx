@@ -1,5 +1,5 @@
 import { BrowserRouter as Router, Routes, Route, useLocation, Navigate } from "react-router-dom";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import "./App.css";
 import GrChat from "./components/grchat";
 import Navbar from "./components/Navbar";
@@ -10,23 +10,42 @@ import FrontPage from "./lib/frontpage";
 import { onAuthStateChanged } from "firebase/auth";
 // auth is firebae's authentication instance
 import { auth } from "./firebase";
+import { doc, getDoc } from "firebase/firestore";
+import { db } from "./firebase";
 
 function AppContent() {
   const [user, setUser] = useState(null);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const location = useLocation();
+  const [username, setUsername] = useState("");
 
   // firebase Listener
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      setUser(user);
-      setIsLoggedIn(!!user);
-    });
-    return () => unsubscribe();
-  }, []);
+  const unsubscribe = onAuthStateChanged(auth, async (user) => {
+    setUser(user);
+    setIsLoggedIn(!!user);
+
+    if (user) {
+      const userRef = doc(db, "userData", user.uid);
+      const userSnap = await getDoc(userRef);
+
+      if (userSnap.exists()) {
+        setUsername(userSnap.data().username);
+      } else {
+        console.log("No such user document!");
+      }
+    }
+    if (!username) return <p>Loading user info...</p>;
+  });
+
+  return () => unsubscribe();
+}, []);
+
 
   const hideGrChatRoutes = ["/login", "/register"];
   const showGrChat = isLoggedIn && !hideGrChatRoutes.includes(location.pathname);
+
+  
 
   return (
     <>
@@ -34,7 +53,7 @@ function AppContent() {
       <Routes>
         <Route
           path="/"
-          element={isLoggedIn ? <MainPage user={user} /> : <FrontPage />}
+          element={isLoggedIn ? <MainPage user={user} username={username}/> : <FrontPage />}
         />
         <Route
           path="/login"
@@ -50,10 +69,10 @@ function AppContent() {
   );
 }
 
-function MainPage({user}) {
+function MainPage({user, username}) {
   return (
     <div className="p-4 text-center text-lg">
-      Hello {user?.email}
+      Hello {username}
       
     </div>
   );

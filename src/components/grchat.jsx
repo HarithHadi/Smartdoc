@@ -3,12 +3,25 @@ import React, { useState, useEffect } from "react";
 import { Input } from "./ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
 import Tesseract, { createWorker } from "tesseract.js";
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import { jsPDF } from "jspdf";
 import html2canvas from "html2canvas-pro";
+import { db, auth } from "../firebase";
+import { collection, addDoc, serverTimestamp } from "firebase/firestore";
+import { onAuthStateChanged } from "firebase/auth";
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog"
+import { Label } from "@/components/ui/label"
 
 
 // This component allows users to input code and generate documentation for it using the Groq API
@@ -18,6 +31,7 @@ function GrChat() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [image, setImage] = useState("");
+  const [title, setTitle] = useState("Unititled Document");
 
     useEffect(() => {
     console.log("Updated doc:", doc);
@@ -173,6 +187,27 @@ function GrChat() {
 };
 
 
+  const saveCodetoFirestore = async (code) => {
+    const user = auth.currentUser;
+    if(!user) return;
+
+    try{
+      await addDoc(collection(db,"userData", user.uid, "codes"), {
+        title : title,
+        code : code,
+        createdAt : serverTimestamp()
+      });
+      console.log("code saved to firestore");
+    }catch (err) {
+      console.error("Error saving code:", err);
+    }
+  };
+
+  
+
+
+
+
 
   return (
     <div id="pre" style={{ maxWidth: "800px", margin: "0 auto", paddingTop: "1rem" }}>
@@ -216,7 +251,7 @@ function GrChat() {
           />
         </div>
 
-        <div style={{ paddingBottom: "1rem" }}>
+        <div style={{ paddingBottom: "1rem", gap: "20px" }}>
           <Button
             onClick={generateDocs}
             disabled={loading}
@@ -301,6 +336,40 @@ function GrChat() {
                         >
                             Download Documentation
                 </Button>
+                <Dialog>
+                  <DialogTrigger asChild>
+                    <Button variant="default" className="ml-4">Save Document</Button>
+                  </DialogTrigger>
+                  <DialogContent className="sm:max-w-md [&>button]:hidden" >
+                    <DialogHeader>
+                      <DialogTitle>Save Document</DialogTitle>
+                      <DialogDescription>
+                        This will be the title of your document.
+                      </DialogDescription>
+                    </DialogHeader>
+                    <div className="flex items-center gap-2">
+                      <div className="grid flex-1 gap-2">
+                        <Label htmlFor="link" className="sr-only">
+                          Link
+                        </Label>
+                        <Input
+                          defaultValue="Title name"
+                          required
+                          onChange={(e)=> setTitle(e.target.value)}
+                        />
+                      </div>
+                    </div>
+                    <DialogFooter className="sm:justify-start">
+                      <DialogClose asChild>
+                        <Button                        
+                         type="button" variant="default" onClick={() => saveCodetoFirestore(code)}
+                         >
+                          Save
+                        </Button>
+                      </DialogClose>
+                    </DialogFooter>
+                  </DialogContent>
+                </Dialog>
 
               </div>
               

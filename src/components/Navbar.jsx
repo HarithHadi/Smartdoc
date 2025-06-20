@@ -51,7 +51,7 @@ export default function Navbar() {
         position: "fixed",
         top: 0,
         right: 0,
-        zIndex: 1000,
+        zIndex: 3,
         padding: "10px 20px",
       }}
     >
