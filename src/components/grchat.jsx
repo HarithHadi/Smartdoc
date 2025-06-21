@@ -3,11 +3,25 @@ import React, { useState, useEffect } from "react";
 import { Input } from "./ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
 import Tesseract, { createWorker } from "tesseract.js";
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import { jsPDF } from "jspdf";
+import html2canvas from "html2canvas-pro";
+import { db, auth } from "../firebase";
+import { collection, addDoc, serverTimestamp } from "firebase/firestore";
+import { onAuthStateChanged } from "firebase/auth";
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog"
+import { Label } from "@/components/ui/label"
 
 
 // This component allows users to input code and generate documentation for it using the Groq API
@@ -17,6 +31,7 @@ function GrChat() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [image, setImage] = useState("");
+  const [title, setTitle] = useState("Unititled Document");
 
     useEffect(() => {
     console.log("Updated doc:", doc);
@@ -111,12 +126,86 @@ function GrChat() {
     }
   }
 
-  const generatePdf = () => {
-  const docPDF = new jsPDF();
-  const lines = docPDF.splitTextToSize(doc, 180); // wrap at 180 units
-  docPDF.text(lines, 10, 10);
-  docPDF.save("documentation.pdf");
+  //jsPDF function
+  // const generatePdf = () => {
+  // const docPDF = new jsPDF();
+  // const lines = docPDF.splitTextToSize(doc, 180); // wrap at 180 units
+  // docPDF.text(lines, 10, 10);
+  // docPDF.save("documentation.pdf");
+  // };
+
+  //html2pdfpro
+  const generatePdf = async () => {
+  const element = document.getElementById("pdf-content");
+  const now = new Date();
+  const fileName = `SmartDoc-${now.toISOString().slice(0,10)}.pdf`;
+
+  if (!element) {
+    console.error("Element not found");
+    return;
+  }
+
+  try {
+    const canvas = await html2canvas(element, {
+      useCORS: true,
+      allowTaint: true,
+      backgroundColor: "#ffffff",
+      logging: false
+    });
+
+    const imgData = canvas.toDataURL("image/png");
+    const pdf = new jsPDF("p", "mm", "a4");
+
+    // calculate width/height based on canvas size and PDF page size
+    const imgWidth = 210; // A4 width in mm
+    const pageHeight = 297; // A4 height in mm
+    const imgHeight = (canvas.height * imgWidth) / canvas.width;
+
+    let position = 0;
+
+    if (imgHeight < pageHeight) {
+      pdf.addImage(imgData, "PNG", 0, 0, imgWidth, imgHeight);
+    } else {
+      // For content taller than one page
+      let heightLeft = imgHeight;
+
+      while (heightLeft > 0) {
+        pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
+        heightLeft -= pageHeight;
+        position -= pageHeight;
+
+        if (heightLeft > 0) {
+          pdf.addPage();
+        }
+      }
+    }
+
+    pdf.save(fileName);
+  } catch (error) {
+    console.error("PDF generation failed:", error);
+  }
 };
+
+
+  const saveCodetoFirestore = async (code) => {
+    const user = auth.currentUser;
+    if(!user) return;
+
+    try{
+      await addDoc(collection(db,"userData", user.uid, "codes"), {
+        title : title,
+        code : code,
+        createdAt : serverTimestamp()
+      });
+      console.log("code saved to firestore");
+    }catch (err) {
+      console.error("Error saving code:", err);
+    }
+  };
+
+  
+
+
 
 
 
@@ -162,7 +251,7 @@ function GrChat() {
           />
         </div>
 
-        <div style={{ paddingBottom: "1rem" }}>
+        <div style={{ paddingBottom: "1rem", gap: "20px" }}>
           <Button
             onClick={generateDocs}
             disabled={loading}
@@ -207,6 +296,7 @@ function GrChat() {
                   textAlign: "left",
                   borderRadius: "5px"
                 }}
+                id="pdf-content"
               >
                 <ReactMarkdown  
                   remarkPlugins={[remarkGfm]}
@@ -220,7 +310,8 @@ function GrChat() {
                       p: ({ node, ...props }) => <p style={{ marginBottom: '1rem' }} {...props} />,
                       
                     }}
-                  >{doc}</ReactMarkdown>
+                  >{doc}
+                </ReactMarkdown>
 
               </div>
               <div style={{ padding:"1rem"}}>
@@ -245,6 +336,40 @@ function GrChat() {
                         >
                             Download Documentation
                 </Button>
+                <Dialog>
+                  <DialogTrigger asChild>
+                    <Button variant="default" className="ml-4">Save Document</Button>
+                  </DialogTrigger>
+                  <DialogContent className="sm:max-w-md [&>button]:hidden" >
+                    <DialogHeader>
+                      <DialogTitle>Save Document</DialogTitle>
+                      <DialogDescription>
+                        This will be the title of your document.
+                      </DialogDescription>
+                    </DialogHeader>
+                    <div className="flex items-center gap-2">
+                      <div className="grid flex-1 gap-2">
+                        <Label htmlFor="link" className="sr-only">
+                          Link
+                        </Label>
+                        <Input
+                          defaultValue="Title name"
+                          required
+                          onChange={(e)=> setTitle(e.target.value)}
+                        />
+                      </div>
+                    </div>
+                    <DialogFooter className="sm:justify-start">
+                      <DialogClose asChild>
+                        <Button                        
+                         type="button" variant="default" onClick={() => saveCodetoFirestore(code)}
+                         >
+                          Save
+                        </Button>
+                      </DialogClose>
+                    </DialogFooter>
+                  </DialogContent>
+                </Dialog>
 
               </div>
               

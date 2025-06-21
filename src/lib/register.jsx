@@ -4,6 +4,7 @@ import { createUserWithEmailAndPassword } from "firebase/auth";
 import { auth } from "../firebase";
 import { doc, setDoc } from "firebase/firestore";
 import { Button } from "@/components/ui/button";
+import { db } from "../firebase";
 
 export default function Register() {
   const [username, setUsername] = useState("");
@@ -43,7 +44,7 @@ export default function Register() {
       const user = userCredential.user;
 
       // Save additional data in Firestore
-      await setDoc(doc(db, "users", user.uid), {
+      await setDoc(doc(db, "userData", user.uid), {
         username: username,
         email: email,
         createdAt: new Date().toISOString()
