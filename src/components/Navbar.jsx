@@ -10,8 +10,10 @@ import { Button } from "@/components/ui/button";
 
 import { auth } from "../firebase"; // Adjust path if needed
 import { onAuthStateChanged, signOut } from "firebase/auth";
+// import { boxShadow } from "html2canvas-pro/dist/types/css/property-descriptors/box-shadow";
 
-export default function Navbar() {
+
+export default function Navbar({username}) {
   const [user, setUser] = useState(null);
   const navigate = useNavigate();
 
@@ -61,6 +63,11 @@ export default function Navbar() {
         style={{ display: "flex", justifyContent: "flex-end", gap: "20px" }}
       >
         <NavigationMenuList style={{ display: "flex", gap: "20px" }}>
+          <NavigationMenuItem>
+            <Button className="shadow-none pointer-events-none" style={{backgroundColor: "#FFFFFF", color:"#36454F"}}>
+              Hello {username} !
+            </Button>
+          </NavigationMenuItem>
           {/* Home Button */}
           <NavigationMenuItem>
             <Link to="/">
@@ -79,7 +86,6 @@ export default function Navbar() {
               </Button>
             </Link>
           </NavigationMenuItem>
-
           {!user && (
             <>
               {/* Login Button */}
@@ -123,6 +129,7 @@ export default function Navbar() {
           )}
 
           {user && (
+            <>
             <NavigationMenuItem>
               <Button
                 onClick={handleLogout}
@@ -144,6 +151,7 @@ export default function Navbar() {
                 Logout
               </Button>
             </NavigationMenuItem>
+            </>
           )}
         </NavigationMenuList>
       </NavigationMenu>

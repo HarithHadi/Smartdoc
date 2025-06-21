@@ -49,7 +49,7 @@ function AppContent() {
 
   return (
     <>
-      <Navbar user={user}/>
+      <Navbar username={username}/>
       <Routes>
         <Route
           path="/"
@@ -70,12 +70,7 @@ function AppContent() {
 }
 
 function MainPage({user, username}) {
-  return (
-    <div className="p-4 text-center text-lg">
-      Hello {username}
-      
-    </div>
-  );
+  return;
 }
 
 function App() {
