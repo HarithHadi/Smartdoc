@@ -11,21 +11,43 @@ export default function Login() {
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError("");
+  e.preventDefault();
+  setError("");
 
-    if (!email || !password) {
-      setError("Please fill in all fields.");
-      return;
+  if (!email || !password) {
+    setError("Please fill in all fields.");
+    return;
+  }
+
+  try {
+    await signInWithEmailAndPassword(auth, email, password);
+    navigate("/"); // success
+  } catch (err) {
+      console.error("Firebase login error:", err.code); // Only log the code
+
+      switch (err.code) {
+        case "auth/invalid-email":
+          setError("Invalid email format.");
+          break;
+        case "auth/user-disabled":
+          setError("This account has been disabled.");
+          break;
+        case "auth/user-not-found":
+          setError("Email not registered.");
+          break;
+        case "auth/wrong-password":
+          setError("Wrong password.");
+          break;
+        case "auth/too-many-requests":
+          setError("Too many failed attempts. Try again later.");
+          break;
+        default:
+          setError("Login failed. Please try again.");
+      }
     }
 
-    try {
-      await signInWithEmailAndPassword(auth, email, password);
-      navigate("/"); // redirect on success
-    } catch (err) {
-      setError("Invalid email or password.");
-    }
-  };
+};
+
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-background px-4">
