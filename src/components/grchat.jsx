@@ -9,8 +9,9 @@ import remarkGfm from 'remark-gfm'
 import { jsPDF } from "jspdf";
 import html2canvas from "html2canvas-pro";
 import { db, auth } from "../firebase";
-import { collection, addDoc, serverTimestamp } from "firebase/firestore";
+import { collection, addDoc, serverTimestamp, getDocs } from "firebase/firestore";
 import { onAuthStateChanged } from "firebase/auth";
+
 import {
   Dialog,
   DialogClose,
@@ -22,20 +23,26 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog"
 import { Label } from "@/components/ui/label"
+import SidebarHistory  from "./Sidebarhistory";
+import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar"
 
 
 // This component allows users to input code and generate documentation for it using the Groq API
-function GrChat() {
+function GrChat({username}) {
   const [code, setCode] = useState("");
   const [doc, setDoc] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [image, setImage] = useState("");
   const [title, setTitle] = useState("Unititled Document");
+  const [open, setOpen] = useState(false);
+  const [selectedCodeId, setSelectedCodeId] = useState(null);
+  const [isSaved, setIsSaved] = useState(false);
+  const [codes, setCodes] = useState([]);
 
     useEffect(() => {
     console.log("Updated doc:", doc);
-  }, [doc]);
+    }, [doc]);
 
 
   // API key for the Groq API
@@ -60,6 +67,8 @@ function GrChat() {
     setLoading(true);
     setError("");
     setDoc("");
+    setSelectedCodeId(null);
+    // setIsSaved(false);
 
     try {
       // uncomment this to simulate timeout
@@ -188,30 +197,54 @@ function GrChat() {
 
 
   const saveCodetoFirestore = async (code) => {
-    const user = auth.currentUser;
-    if(!user) return;
+  const user = auth.currentUser;
+  if (!user) return;
 
-    try{
-      await addDoc(collection(db,"userData", user.uid, "codes"), {
-        title : title,
-        code : code,
-        createdAt : serverTimestamp()
-      });
-      console.log("code saved to firestore");
-    }catch (err) {
-      console.error("Error saving code:", err);
-    }
+  try {
+    const docRef = await addDoc(collection(db, "userData", user.uid, "codes"), {
+      title: title,
+      code: code,
+      createdAt: serverTimestamp(),
+    });
+
+    console.log("Code saved to Firestore with ID:", docRef.id);
+    setSelectedCodeId(docRef.id); // This is what you want
+    setIsSaved(true);
+    await fetchCodes();
+  } catch (err) {
+    console.error("Error saving code:", err);
+  }
+};
+  const fetchCodes = async () => {
+    const user = auth.currentUser;
+    if (!user) return;
+
+    const codesRef = collection(db, "userData", user.uid, "codes");
+    const snapshot = await getDocs(codesRef);
+    const codeList = snapshot.docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data(),
+    }));
+    setCodes(codeList);
   };
 
-  
-
-
-
+  useEffect(() => {
+    fetchCodes();
+  }, []);
 
 
   return (
-    <div id="pre" style={{ maxWidth: "800px", margin: "0 auto", paddingTop: "1rem" }}>
+    
+    <SidebarProvider open={open} onOpenChange={setOpen}>
+       <div className={`fixed top-4 left-4 z-50 transition-all duration-300 ${
+        open ? "left-65" : "left-4"
+      }`}>
+          <SidebarTrigger/>
+        </div>
+
+    <SidebarHistory username={username} codes={codes} fetchCodes={fetchCodes}  onSelectCode={(savedCode, id) => {setCode(savedCode); setSelectedCodeId(id); setIsSaved(true);}} />
       
+    <div id="pre" style={{ maxWidth: "100%", margin: "0 0", paddingTop: "1rem" }}>      
       <div style={{ paddingBottom : "3rem"}}>
         <h1 className="mb-4 text-4xl font-extrabold tracking-tight text-gray-900 md:text-5xl lg:text-6xl dark:text-white">
           SmartDoc 📋
@@ -225,7 +258,7 @@ function GrChat() {
         <div style={{ paddingBottom: "1rem" }}>
           <Textarea
             value={code}
-            onChange={(e) => setCode(e.target.value)}
+            onChange={(e) => {setCode(e.target.value), setIsSaved(false);}}
             rows={8}
             placeholder="Paste your code here..."
             style={{ width: "100%", marginBottom: "1rem" }}
@@ -264,7 +297,7 @@ function GrChat() {
               transition: "background-color 0.3s, color 0.3s",
             }}
             onMouseEnter={(e) => {
-              e.target.style.backgroundColor = "#FFFFFF";
+              e.target.style.backgroundColor = "#f3f3f3";
               e.target.style.color = "#000000";
             }}
             onMouseLeave={(e) => {
@@ -326,7 +359,7 @@ function GrChat() {
                           transition: "background-color 0.3s, color 0.3s",
                         }}
                         onMouseEnter={(e) => {
-                            e.target.style.backgroundColor = "#FFFFFF";
+                            e.target.style.backgroundColor = "#f3f3f3";
                             e.target.style.color = "#000000";
                         }}
                         onMouseLeave={(e) => {
@@ -336,9 +369,27 @@ function GrChat() {
                         >
                             Download Documentation
                 </Button>
-                <Dialog>
+                {!isSaved && (
+                  <Dialog>
                   <DialogTrigger asChild>
-                    <Button variant="default" className="ml-4">Save Document</Button>
+                    <Button variant="default" className="ml-4"
+                    style={{
+                            backgroundColor: "#000000",
+                            color: "#FFFFFF",
+                            padding: "10px 20px",
+                            borderRadius: "5px",
+                            cursor: "pointer",
+                            transition: "background-color 0.3s, color 0.3s",
+                          }}
+                    onMouseEnter={(e) => {
+                            e.target.style.backgroundColor = "#f3f3f3";
+                            e.target.style.color = "#000000";
+                        }}
+                        onMouseLeave={(e) => {
+                            e.target.style.backgroundColor = "#000000";
+                            e.target.style.color = "#FFFFFF";
+                        }}
+                    >Save Document</Button>
                   </DialogTrigger>
                   <DialogContent className="sm:max-w-md [&>button]:hidden" >
                     <DialogHeader>
@@ -361,7 +412,23 @@ function GrChat() {
                     </div>
                     <DialogFooter className="sm:justify-start">
                       <DialogClose asChild>
-                        <Button                        
+                        <Button
+                         style={{
+                            backgroundColor: "#000000",
+                            color: "#FFFFFF",
+                            padding: "10px 20px",
+                            borderRadius: "5px",
+                            cursor: "pointer",
+                            transition: "background-color 0.3s, color 0.3s",
+                          }}
+                          onMouseEnter={(e) => {
+                            e.target.style.backgroundColor = "#f3f3f3";
+                            e.target.style.color = "#000000";
+                        }}
+                        onMouseLeave={(e) => {
+                            e.target.style.backgroundColor = "#000000";
+                            e.target.style.color = "#FFFFFF";
+                        }}                         
                          type="button" variant="default" onClick={() => saveCodetoFirestore(code)}
                          >
                           Save
@@ -370,6 +437,8 @@ function GrChat() {
                     </DialogFooter>
                   </DialogContent>
                 </Dialog>
+                )}
+                
 
               </div>
               
@@ -379,6 +448,8 @@ function GrChat() {
         </div>
       </div> 
     </div>
+    </SidebarProvider>
+    
   );
 }
 

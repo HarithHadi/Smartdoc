@@ -64,7 +64,7 @@ function AppContent() {
           element={!isLoggedIn ? <Register /> : <Navigate to="/" replace />}
         />
       </Routes>
-      {showGrChat && <GrChat />}
+      {showGrChat && <GrChat username={username}/>}
     </>
   );
 }
