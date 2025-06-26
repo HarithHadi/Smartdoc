@@ -26,26 +26,7 @@ import { Button } from "@/components/ui/button";
 import { Trash2 } from "lucide-react";
 // import { error } from "console";
 
-function SidebarHistory({ onSelectCode }) {
-  const [codes, setCodes] = useState([]);
-
-  useEffect(() => {
-    const fetchCodes = async () => {
-      const user = auth.currentUser;
-      if (!user) return;
-
-      const codesRef = collection(db, "userData", user.uid, "codes");
-      const snapshot = await getDocs(codesRef);
-      const codeList = snapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
-      setCodes(codeList);
-    };
-
-    fetchCodes();
-  }, []);
-  
+function SidebarHistory({ onSelectCode, codes, fetchCodes }) {
   const deleteCode = async(id) =>{
     const user = auth.currentUser;
     if(!user) return;
@@ -54,7 +35,7 @@ function SidebarHistory({ onSelectCode }) {
       const codeDocRef = doc(db, "userData", user.uid, "codes", id);
       await deleteDoc(codeDocRef);
       console.log("Document Deleted");
-      setCodes (prev => prev.filter(item => item.id !== id));
+      await fetchCodes();
 
     }catch(err){
       console.error("Error deleting document :", error);
