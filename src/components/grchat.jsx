@@ -28,7 +28,7 @@ import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar"
 
 
 // This component allows users to input code and generate documentation for it using the Groq API
-function GrChat() {
+function GrChat({username}) {
   const [code, setCode] = useState("");
   const [doc, setDoc] = useState("");
   const [loading, setLoading] = useState(false);
@@ -242,7 +242,7 @@ function GrChat() {
           <SidebarTrigger/>
         </div>
 
-    <SidebarHistory codes={codes} fetchCodes={fetchCodes}  onSelectCode={(savedCode, id) => {setCode(savedCode); setSelectedCodeId(id); setIsSaved(true);}} />
+    <SidebarHistory username={username} codes={codes} fetchCodes={fetchCodes}  onSelectCode={(savedCode, id) => {setCode(savedCode); setSelectedCodeId(id); setIsSaved(true);}} />
       
     <div id="pre" style={{ maxWidth: "100%", margin: "0 0", paddingTop: "1rem" }}>      
       <div style={{ paddingBottom : "3rem"}}>
@@ -297,7 +297,7 @@ function GrChat() {
               transition: "background-color 0.3s, color 0.3s",
             }}
             onMouseEnter={(e) => {
-              e.target.style.backgroundColor = "#FFFFFF";
+              e.target.style.backgroundColor = "#f3f3f3";
               e.target.style.color = "#000000";
             }}
             onMouseLeave={(e) => {
@@ -359,7 +359,7 @@ function GrChat() {
                           transition: "background-color 0.3s, color 0.3s",
                         }}
                         onMouseEnter={(e) => {
-                            e.target.style.backgroundColor = "#FFFFFF";
+                            e.target.style.backgroundColor = "#f3f3f3";
                             e.target.style.color = "#000000";
                         }}
                         onMouseLeave={(e) => {
@@ -382,7 +382,7 @@ function GrChat() {
                             transition: "background-color 0.3s, color 0.3s",
                           }}
                     onMouseEnter={(e) => {
-                            e.target.style.backgroundColor = "#FFFFFF";
+                            e.target.style.backgroundColor = "#f3f3f3";
                             e.target.style.color = "#000000";
                         }}
                         onMouseLeave={(e) => {
@@ -413,7 +413,22 @@ function GrChat() {
                     <DialogFooter className="sm:justify-start">
                       <DialogClose asChild>
                         <Button
-                                                  
+                         style={{
+                            backgroundColor: "#000000",
+                            color: "#FFFFFF",
+                            padding: "10px 20px",
+                            borderRadius: "5px",
+                            cursor: "pointer",
+                            transition: "background-color 0.3s, color 0.3s",
+                          }}
+                          onMouseEnter={(e) => {
+                            e.target.style.backgroundColor = "#f3f3f3";
+                            e.target.style.color = "#000000";
+                        }}
+                        onMouseLeave={(e) => {
+                            e.target.style.backgroundColor = "#000000";
+                            e.target.style.color = "#FFFFFF";
+                        }}                         
                          type="button" variant="default" onClick={() => saveCodetoFirestore(code)}
                          >
                           Save
@@ -422,8 +437,6 @@ function GrChat() {
                     </DialogFooter>
                   </DialogContent>
                 </Dialog>
-                  
-                  
                 )}
                 
 

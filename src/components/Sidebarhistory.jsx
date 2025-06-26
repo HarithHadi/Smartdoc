@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
-import { auth, db } from "../firebase";
+import { auth, db,  } from "../firebase";
 import { collection, getDocs } from "firebase/firestore";
 import { deleteDoc, doc } from "firebase/firestore";
-import { MoreHorizontal } from "lucide-react";
+import { MoreHorizontal, User2, ChevronUp  } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -13,6 +13,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarMenuAction,
+  SidebarFooter
 } from "@/components/ui/sidebar";
 import {
   DropdownMenu,
@@ -22,11 +23,22 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Button } from "@/components/ui/button";
-import { Trash2 } from "lucide-react";
+import {signOut } from "firebase/auth";
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog"
+import { Label } from "@/components/ui/label"
 // import { error } from "console";
 
-function SidebarHistory({ onSelectCode, codes, fetchCodes }) {
+function SidebarHistory({ onSelectCode, codes, fetchCodes, username }) {
+  const [user, setUser] = useState(null);
   const deleteCode = async(id) =>{
     const user = auth.currentUser;
     if(!user) return;
@@ -41,6 +53,10 @@ function SidebarHistory({ onSelectCode, codes, fetchCodes }) {
       console.error("Error deleting document :", error);
     }
   }
+  const handleLogout = async () => {
+    await signOut(auth);
+    navigate("/login");
+  };
 
   return (
     <Sidebar>
@@ -74,6 +90,31 @@ function SidebarHistory({ onSelectCode, codes, fetchCodes }) {
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
+      <SidebarFooter>
+        <SidebarMenu>
+            <SidebarMenuItem>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <SidebarMenuButton>
+                    <User2 /> {username}
+                    <ChevronUp className="ml-auto" />
+                  </SidebarMenuButton>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent
+                  side="top"
+                  className="min-w-[250px]"
+                >
+                  <DropdownMenuItem>
+                    <span>Edit Profile</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={handleLogout}>
+                    <span>Sign out</span>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </SidebarMenuItem>
+          </SidebarMenu>
+      </SidebarFooter>
     </Sidebar>
   );
 }

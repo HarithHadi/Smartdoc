@@ -24,10 +24,6 @@ export default function Navbar({username}) {
     return unsubscribe;
   }, []);
 
-  const handleLogout = async () => {
-    await signOut(auth);
-    navigate("/login");
-  };
 
   const buttonStyleLight = {
     backgroundColor: "#FFFFFF",
@@ -130,31 +126,7 @@ export default function Navbar({username}) {
             </>
           )}
 
-          {user && (
-            <>
-            <NavigationMenuItem>
-              <Button
-                onClick={handleLogout}
-                style={{
-                  backgroundColor: "#dc2626",
-                  color: "#fff",
-                  padding: "10px 20px",
-                  borderRadius: "5px",
-                  cursor: "pointer",
-                  transition: "background-color 0.3s, color 0.3s",
-                }}
-                onMouseEnter={(e) => {
-                  e.target.style.backgroundColor = "#991b1b";
-                }}
-                onMouseLeave={(e) => {
-                  e.target.style.backgroundColor = "#dc2626";
-                }}
-              >
-                Logout
-              </Button>
-            </NavigationMenuItem>
-            </>
-          )}
+          
         </NavigationMenuList>
       </NavigationMenu>
     </div>
