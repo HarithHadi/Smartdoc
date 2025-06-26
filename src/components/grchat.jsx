@@ -34,7 +34,9 @@ function GrChat() {
   const [error, setError] = useState("");
   const [image, setImage] = useState("");
   const [title, setTitle] = useState("Unititled Document");
-  const [open, setOpen] = useState(false)
+  const [open, setOpen] = useState(false);
+  const [selectedCodeId, setSelectedCodeId] = useState(null);
+  const [isSaved, setIsSaved] = useState(false);
 
     useEffect(() => {
     console.log("Updated doc:", doc);
@@ -63,6 +65,8 @@ function GrChat() {
     setLoading(true);
     setError("");
     setDoc("");
+    setSelectedCodeId(null);
+    setIsSaved(false);
 
     try {
       // uncomment this to simulate timeout
@@ -191,26 +195,23 @@ function GrChat() {
 
 
   const saveCodetoFirestore = async (code) => {
-    const user = auth.currentUser;
-    if(!user) return;
+  const user = auth.currentUser;
+  if (!user) return;
 
-    try{
-      await addDoc(collection(db,"userData", user.uid, "codes"), {
-        title : title,
-        code : code,
-        createdAt : serverTimestamp()
-      });
-      console.log("code saved to firestore");
-    }catch (err) {
-      console.error("Error saving code:", err);
-    }
-  };
+  try {
+    const docRef = await addDoc(collection(db, "userData", user.uid, "codes"), {
+      title: title,
+      code: code,
+      createdAt: serverTimestamp(),
+    });
 
-  
-
-
-
-
+    console.log("Code saved to Firestore with ID:", docRef.id);
+    setSelectedCodeId(docRef.id); // This is what you want
+    setIsSaved(true);
+  } catch (err) {
+    console.error("Error saving code:", err);
+  }
+};
 
   return (
     
@@ -221,7 +222,7 @@ function GrChat() {
           <SidebarTrigger/>
         </div>
 
-    <SidebarHistory  onSelectCode={(savedCode) => setCode(savedCode)} />
+    <SidebarHistory  onSelectCode={(savedCode, id) => {setCode(savedCode); setSelectedCodeId(id); setIsSaved(true);}} />
       
     <div id="pre" style={{ maxWidth: "100%", margin: "0 0", paddingTop: "1rem" }}>      
       <div style={{ paddingBottom : "3rem"}}>
@@ -237,7 +238,7 @@ function GrChat() {
         <div style={{ paddingBottom: "1rem" }}>
           <Textarea
             value={code}
-            onChange={(e) => setCode(e.target.value)}
+            onChange={(e) => {setCode(e.target.value), setIsSaved(false);}}
             rows={8}
             placeholder="Paste your code here..."
             style={{ width: "100%", marginBottom: "1rem" }}
@@ -348,7 +349,8 @@ function GrChat() {
                         >
                             Download Documentation
                 </Button>
-                <Dialog>
+                {!selectedCodeId && (
+                  <Dialog>
                   <DialogTrigger asChild>
                     <Button variant="default" className="ml-4"
                     style={{
@@ -400,6 +402,10 @@ function GrChat() {
                     </DialogFooter>
                   </DialogContent>
                 </Dialog>
+                  
+                  
+                )}
+                
 
               </div>
               

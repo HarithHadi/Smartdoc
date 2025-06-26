@@ -1,17 +1,32 @@
 import { useEffect, useState } from "react";
 import { auth, db } from "../firebase";
 import { collection, getDocs } from "firebase/firestore";
-import { 
-  Sidebar, 
+import { deleteDoc, doc } from "firebase/firestore";
+import { MoreHorizontal } from "lucide-react";
+import {
+  Sidebar,
   SidebarContent,
   SidebarGroup,
   SidebarGroupContent,
   SidebarGroupLabel,
   SidebarMenu,
   SidebarMenuButton,
-  SidebarMenuItem, } from "@/components/ui/sidebar"
+  SidebarMenuItem,
+  SidebarMenuAction,
+} from "@/components/ui/sidebar";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Button } from "@/components/ui/button";
+import { Trash2 } from "lucide-react";
+// import { error } from "console";
 
-function SidebarHistory ({ onSelectCode }) {
+function SidebarHistory({ onSelectCode }) {
   const [codes, setCodes] = useState([]);
 
   useEffect(() => {
@@ -21,29 +36,32 @@ function SidebarHistory ({ onSelectCode }) {
 
       const codesRef = collection(db, "userData", user.uid, "codes");
       const snapshot = await getDocs(codesRef);
-      const codeList = snapshot.docs.map(doc => ({
+      const codeList = snapshot.docs.map((doc) => ({
         id: doc.id,
-        ...doc.data()
+        ...doc.data(),
       }));
       setCodes(codeList);
     };
 
     fetchCodes();
   }, []);
+  
+  const deleteCode = async(id) =>{
+    const user = auth.currentUser;
+    if(!user) return;
+
+    try{
+      const codeDocRef = doc(db, "userData", user.uid, "codes", id);
+      await deleteDoc(codeDocRef);
+      console.log("Document Deleted");
+      setCodes (prev => prev.filter(item => item.id !== id));
+
+    }catch(err){
+      console.error("Error deleting document :", error);
+    }
+  }
 
   return (
-    // <div className="w-64 bg-gray-100 p-4 h-screen overflow-y-auto">
-    //   <h2 className="text-lg font-semibold mb-4">Saved Codes</h2>
-    //   {codes.map((item) => (
-    //     <div
-    //       key={item.id}
-    //       className="mb-2 cursor-pointer hover:bg-gray-200 p-2 rounded font-bold"
-    //       onClick={() => onSelectCode(item.code)}
-    //     >
-    //       {item.title || "Untitled"}
-    //     </div>
-    //   ))}
-    // </div>
     <Sidebar>
       <SidebarContent>
         <SidebarGroup>
@@ -53,10 +71,22 @@ function SidebarHistory ({ onSelectCode }) {
               {codes.map((item) => (
                 <SidebarMenuItem
                   key={item.id}
-                  className="mb-2 cursor-pointer hover:bg-gray-200 p-2 rounded font-bold text-left text-sm"
-                  onClick={() => onSelectCode(item.code)}
+                  className="p-4 mb-2 cursor-pointer hover:bg-gray-200 rounded font-bold text-left text-sm"
+                  onClick={() => onSelectCode(item.code, item.id)}
                 >
                   {item.title || "Untitled"}
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <SidebarMenuAction>
+                        <MoreHorizontal />
+                      </SidebarMenuAction>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent side="right" align="start">
+                      <DropdownMenuItem onClick={()=>deleteCode((item.id))}>
+                        <span>Delete Project</span>
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 </SidebarMenuItem>
               ))}
             </SidebarMenu>
@@ -64,7 +94,6 @@ function SidebarHistory ({ onSelectCode }) {
         </SidebarGroup>
       </SidebarContent>
     </Sidebar>
-
   );
 }
 
