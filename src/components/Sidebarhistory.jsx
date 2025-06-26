@@ -102,7 +102,7 @@ function SidebarHistory({ onSelectCode, codes, fetchCodes, username }) {
                     </DropdownMenuTrigger>
                     <DropdownMenuContent side="right" align="start">
                       <DropdownMenuItem onClick={()=>deleteCode((item.id))}>
-                        <span>Delete Project</span>
+                        <span>Delete Document</span>
                       </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
