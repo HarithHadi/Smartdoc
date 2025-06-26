@@ -135,15 +135,7 @@ function GrChat({username}) {
     }
   }
 
-  //jsPDF function
-  // const generatePdf = () => {
-  // const docPDF = new jsPDF();
-  // const lines = docPDF.splitTextToSize(doc, 180); // wrap at 180 units
-  // docPDF.text(lines, 10, 10);
-  // docPDF.save("documentation.pdf");
-  // };
 
-  //html2pdfpro
   const generatePdf = async () => {
   const element = document.getElementById("pdf-content");
   const now = new Date();
@@ -226,6 +218,7 @@ function GrChat({username}) {
       ...doc.data(),
     }));
     setCodes(codeList);
+    
   };
 
   useEffect(() => {
@@ -242,7 +235,7 @@ function GrChat({username}) {
           <SidebarTrigger/>
         </div>
 
-    <SidebarHistory username={username} codes={codes} fetchCodes={fetchCodes}  onSelectCode={(savedCode, id) => {setCode(savedCode); setSelectedCodeId(id); setIsSaved(true);}} />
+    <SidebarHistory username={username} codes={codes} fetchCodes={fetchCodes}  onSelectCode={(savedCode, id) => {setCode(savedCode); setSelectedCodeId(id); setIsSaved(true); setDoc("");}} />
       
     <div id="pre" style={{ maxWidth: "100%", margin: "0 0", paddingTop: "1rem" }}>      
       <div style={{ paddingBottom : "3rem"}}>
@@ -258,10 +251,15 @@ function GrChat({username}) {
         <div style={{ paddingBottom: "1rem" }}>
           <Textarea
             value={code}
-            onChange={(e) => {setCode(e.target.value), setIsSaved(false);}}
+            onChange={(e) => {setCode(e.target.value), setIsSaved(false);
+              if(e.target.value.trim()==""){
+                setDoc("");
+              }
+            }}
             rows={8}
             placeholder="Paste your code here..."
             style={{ width: "100%", marginBottom: "1rem" }}
+
           />
         </div>
 
