@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { auth, db,  } from "../firebase";
 import { collection, getDocs } from "firebase/firestore";
-import { deleteDoc, doc } from "firebase/firestore";
+import { deleteDoc, doc, updateDoc } from "firebase/firestore";
 import { MoreHorizontal, User2, ChevronUp  } from "lucide-react";
 import {
   Sidebar,
@@ -15,6 +15,8 @@ import {
   SidebarMenuAction,
   SidebarFooter
 } from "@/components/ui/sidebar";
+import { Input } from "./ui/input";
+import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -39,6 +41,12 @@ import { Label } from "@/components/ui/label"
 
 function SidebarHistory({ onSelectCode, codes, fetchCodes, username }) {
   const [user, setUser] = useState(null);
+  const [newUsername, setNewUsername] = useState(username || "");
+  
+  useEffect(() => {
+  setNewUsername(username || "");
+  }, [username]);
+
   const deleteCode = async(id) =>{
     const user = auth.currentUser;
     if(!user) return;
@@ -57,6 +65,20 @@ function SidebarHistory({ onSelectCode, codes, fetchCodes, username }) {
     await signOut(auth);
     navigate("/login");
   };
+
+  const handleUsernameUpdate = async () => {
+    const user = auth.currentUser;
+    if (!user || !newUsername.trim()) return;
+
+    try {
+      const userRef = doc(db, "userData", user.uid);
+      await updateDoc(userRef, { username: newUsername });
+      console.log("Username updated successfully");
+    } catch (err) {
+      console.error("Failed to update username:", err);
+    }
+};
+
 
   return (
     <Sidebar>
@@ -91,30 +113,56 @@ function SidebarHistory({ onSelectCode, codes, fetchCodes, username }) {
         </SidebarGroup>
       </SidebarContent>
       <SidebarFooter>
-        <SidebarMenu>
-            <SidebarMenuItem>
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <SidebarMenuButton>
-                    <User2 /> {username}
-                    <ChevronUp className="ml-auto" />
-                  </SidebarMenuButton>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent
-                  side="top"
-                  className="min-w-[250px]"
-                >
-                  <DropdownMenuItem>
-                    <span>Edit Profile</span>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={handleLogout}>
-                    <span>Sign out</span>
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </SidebarMenuItem>
-          </SidebarMenu>
-      </SidebarFooter>
+  <SidebarMenu>
+    <SidebarMenuItem>
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <SidebarMenuButton>
+            <User2 /> {username}
+            <ChevronUp className="ml-auto" />
+          </SidebarMenuButton>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent side="top" className="min-w-[250px]">
+          <Dialog>
+            {/* ✅ Trigger the dialog from a styled DropdownMenuItem */}
+            <DialogTrigger asChild>
+              <DropdownMenuItem  onSelect={(e) => e.preventDefault()}>
+                <span>Edit Profile</span>
+              </DropdownMenuItem>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-md">
+              <DialogHeader>
+                <DialogTitle>Edit Profile</DialogTitle>
+                <DialogDescription>
+                  Update your profile information.
+                </DialogDescription>
+              </DialogHeader>
+              <div className="flex items-center gap-2">
+                <div className="grid flex-1 gap-2">
+                  <Label htmlFor="username" className="sr-only">
+                    Username
+                  </Label>
+                  <Input id="username" defaultValue={username} onChange={(e) => setNewUsername(e.target.value)} />
+                </div>
+              </div>
+              <DialogFooter className="sm:justify-start">
+                <DialogClose asChild>
+                  <Button type="button" variant="secondary" onClick={handleUsernameUpdate}>
+                    Save
+                  </Button>
+                </DialogClose>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+
+          <DropdownMenuItem onClick={handleLogout}>
+            <span>Sign out</span>
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    </SidebarMenuItem>
+  </SidebarMenu>
+</SidebarFooter>
     </Sidebar>
   );
 }
