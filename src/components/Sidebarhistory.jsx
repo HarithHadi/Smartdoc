@@ -91,7 +91,7 @@ function SidebarHistory({ onSelectCode, codes, fetchCodes, username }) {
                 <SidebarMenuItem
                   key={item.id}
                   className="p-4 mb-2 cursor-pointer hover:bg-gray-200 rounded font-bold text-left text-sm"
-                  onClick={() => onSelectCode(item.code, item.id)}
+                  onClick={() => onSelectCode(item.code, item.id, item.document)}
                 >
                   {item.title || "Untitled"}
                   <DropdownMenu>

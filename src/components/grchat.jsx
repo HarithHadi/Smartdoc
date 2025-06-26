@@ -145,12 +145,14 @@ function GrChat({username}) {
     console.error("Element not found");
     return;
   }
-
+  const originalBackground = element.style.backgroundColor;
   try {
+    element.style.backgroundColor = "#ffffff";
+
     const canvas = await html2canvas(element, {
       useCORS: true,
       allowTaint: true,
-      backgroundColor: "#ffffff",
+      backgroundColor: null,
       logging: false
     });
 
@@ -184,11 +186,13 @@ function GrChat({username}) {
     pdf.save(fileName);
   } catch (error) {
     console.error("PDF generation failed:", error);
+  } finally{
+    element.style.backgroundColor = originalBackground;
   }
 };
 
 
-  const saveCodetoFirestore = async (code) => {
+  const saveCodetoFirestore = async (code, doc) => {
   const user = auth.currentUser;
   if (!user) return;
 
@@ -196,6 +200,7 @@ function GrChat({username}) {
     const docRef = await addDoc(collection(db, "userData", user.uid, "codes"), {
       title: title,
       code: code,
+      document : doc,
       createdAt: serverTimestamp(),
     });
 
@@ -235,7 +240,7 @@ function GrChat({username}) {
           <SidebarTrigger/>
         </div>
 
-    <SidebarHistory username={username} codes={codes} fetchCodes={fetchCodes}  onSelectCode={(savedCode, id) => {setCode(savedCode); setSelectedCodeId(id); setIsSaved(true); setDoc("");}} />
+    <SidebarHistory username={username} codes={codes} fetchCodes={fetchCodes}  onSelectCode={(savedCode, id, document) => {setCode(savedCode); setSelectedCodeId(id); setIsSaved(true); setDoc(document);}} />
       
     <div id="pre" style={{ maxWidth: "100%", margin: "0 0", paddingTop: "1rem" }}>      
       <div style={{ paddingBottom : "3rem"}}>
@@ -285,7 +290,7 @@ function GrChat({username}) {
         <div style={{ paddingBottom: "1rem", gap: "20px" }}>
           <Button
             onClick={generateDocs}
-            disabled={loading}
+            disabled={loading || isSaved}
             style={{
               backgroundColor: "#000000",
               color: "#FFFFFF",
@@ -303,7 +308,8 @@ function GrChat({username}) {
               e.target.style.color = "#FFFFFF";
             }}
           >
-            {loading ? "Generating..." : "Generate Docs"}
+            {loading ? "Generating..." : isSaved ? "Generated" : "Generate Docs"}
+            
           </Button>
         </div>
 
@@ -427,7 +433,7 @@ function GrChat({username}) {
                             e.target.style.backgroundColor = "#000000";
                             e.target.style.color = "#FFFFFF";
                         }}                         
-                         type="button" variant="default" onClick={() => saveCodetoFirestore(code)}
+                         type="button" variant="default" onClick={() => saveCodetoFirestore(code, doc)}
                          >
                           Save
                         </Button>
