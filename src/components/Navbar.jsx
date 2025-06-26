@@ -63,11 +63,13 @@ export default function Navbar({username}) {
         style={{ display: "flex", justifyContent: "flex-end", gap: "20px" }}
       >
         <NavigationMenuList style={{ display: "flex", gap: "20px" }}>
-          <NavigationMenuItem>
-            <Button className="shadow-none pointer-events-none" style={{backgroundColor: "#FFFFFF", color:"#36454F"}}>
-              Hello {username} !
-            </Button>
-          </NavigationMenuItem>
+          {user && (
+            <NavigationMenuItem>
+              <Button className="shadow-none pointer-events-none" style={{backgroundColor: "#FFFFFF", color:"#36454F"}}>
+                Hello {username} !
+              </Button>
+            </NavigationMenuItem>
+          )}
           {/* Home Button */}
           <NavigationMenuItem>
             <Link to="/">

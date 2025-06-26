@@ -22,6 +22,8 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog"
 import { Label } from "@/components/ui/label"
+import SidebarHistory  from "./Sidebarhistory";
+import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar"
 
 
 // This component allows users to input code and generate documentation for it using the Groq API
@@ -32,6 +34,7 @@ function GrChat() {
   const [error, setError] = useState("");
   const [image, setImage] = useState("");
   const [title, setTitle] = useState("Unititled Document");
+  const [open, setOpen] = useState(false)
 
     useEffect(() => {
     console.log("Updated doc:", doc);
@@ -210,8 +213,17 @@ function GrChat() {
 
 
   return (
-    <div id="pre" style={{ maxWidth: "800px", margin: "0 auto", paddingTop: "1rem" }}>
+    
+    <SidebarProvider open={open} onOpenChange={setOpen}>
+       <div className={`fixed top-4 left-4 z-50 transition-all duration-300 ${
+        open ? "left-65" : "left-4"
+      }`}>
+          <SidebarTrigger/>
+        </div>
+
+    <SidebarHistory  onSelectCode={(savedCode) => setCode(savedCode)} />
       
+    <div id="pre" style={{ maxWidth: "100%", margin: "0 0", paddingTop: "1rem" }}>      
       <div style={{ paddingBottom : "3rem"}}>
         <h1 className="mb-4 text-4xl font-extrabold tracking-tight text-gray-900 md:text-5xl lg:text-6xl dark:text-white">
           SmartDoc 📋
@@ -338,7 +350,24 @@ function GrChat() {
                 </Button>
                 <Dialog>
                   <DialogTrigger asChild>
-                    <Button variant="default" className="ml-4">Save Document</Button>
+                    <Button variant="default" className="ml-4"
+                    style={{
+                            backgroundColor: "#000000",
+                            color: "#FFFFFF",
+                            padding: "10px 20px",
+                            borderRadius: "5px",
+                            cursor: "pointer",
+                            transition: "background-color 0.3s, color 0.3s",
+                          }}
+                    onMouseEnter={(e) => {
+                            e.target.style.backgroundColor = "#FFFFFF";
+                            e.target.style.color = "#000000";
+                        }}
+                        onMouseLeave={(e) => {
+                            e.target.style.backgroundColor = "#000000";
+                            e.target.style.color = "#FFFFFF";
+                        }}
+                    >Save Document</Button>
                   </DialogTrigger>
                   <DialogContent className="sm:max-w-md [&>button]:hidden" >
                     <DialogHeader>
@@ -361,7 +390,8 @@ function GrChat() {
                     </div>
                     <DialogFooter className="sm:justify-start">
                       <DialogClose asChild>
-                        <Button                        
+                        <Button
+                                                  
                          type="button" variant="default" onClick={() => saveCodetoFirestore(code)}
                          >
                           Save
@@ -379,6 +409,8 @@ function GrChat() {
         </div>
       </div> 
     </div>
+    </SidebarProvider>
+    
   );
 }
 
