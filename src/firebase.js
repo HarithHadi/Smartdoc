@@ -14,7 +14,7 @@ const firebaseConfig = {
   appId: import.meta.env.VITE_FIREBASE_APP_ID,
   measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID
 };
-
+console.log("Firebase config:", firebaseConfig);
 const app = initializeApp(firebaseConfig);
 
 // Only initialize analytics if window is available (avoids issues in SSR/testing)
