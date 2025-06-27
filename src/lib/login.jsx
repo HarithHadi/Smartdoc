@@ -3,6 +3,7 @@ import { useNavigate, Link } from "react-router-dom";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from "../firebase"; // adjust the path if needed
 import { Button } from "@/components/ui/button";
+import GoogleSignInButton from "../components/GooelesigninButton";
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -52,7 +53,7 @@ export default function Login() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-background px-4">
       <div className="w-full max-w-md bg-white p-8 rounded-2xl shadow-lg border border-gray-200">
-        <h2 className="text-2xl font-bold mb-6 text-center text-black">Login to Smartdoc</h2>
+        <h2 className="text-2xl font-bold mb-6 text-center text-black">Login to Smartdoc 📋</h2>
 
         {error && <p className="text-red-600 text-sm mb-4 text-center">{error}</p>}
 
@@ -83,11 +84,12 @@ export default function Login() {
 
           <Button
             type="submit"
-            className="w-full bg-black text-black hover:bg-white hover:text-black hover:border-black transition duration-300 py-2 px-4 rounded-md"
+            className="mb-4 w-full bg-[#f4f4f4] text-black hover:bg-black hover:text-[#a3a3a3] hover:border hover:border-black transition duration-300 py-2 px-4 rounded-md flex items-center justify-center gap-2"
           >
             Login
           </Button>
         </form>
+        <GoogleSignInButton/>
 
         <p className="mt-6 text-center text-sm text-gray-600">
           Don’t have an account?{" "}
