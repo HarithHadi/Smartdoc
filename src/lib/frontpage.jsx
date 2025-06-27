@@ -19,7 +19,7 @@ export default function FrontPage() {
         Welcome to Smartdoc
       </h1>
       <p style={{ maxWidth: "400px", marginBottom: "2rem", fontSize: "1.1rem" }}>
-        Smartdoc helps you manage documents easily with chat and collaboration features.
+        SmartDoc helps you summarize your code and save your documents with ease.
       </p>
       <div style={{ display: "flex", gap: "20px" }}>
         <Link to="/login">
