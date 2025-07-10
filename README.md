@@ -1,14 +1,36 @@
-# React + Vite
+# 📄 SmartDoc
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+SmartDoc is an intelligent and user-friendly code documentation generator designed to streamline the process of creating clean, structured, and interactive documentation from your codebase. Built with modern web technologies, SmartDoc helps developers, teams, and organizations keep their documentation consistent, up-to-date, and accessible.
 
-Currently, two official plugins are available:
+## 🚀 Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- 🧠 **AI-Assisted Descriptions** – Auto-generate concise documentation using natural language processing (powered by GroqAPI).
+- 📚 **Supports Multiple Languages** – Parses and documents code from JavaScript, Python, Java, C++, and more.
+- ⚡ **Fast & Lightweight** – Built using React + Vite for a responsive UI and instant load times.
 
-## Expanding the ESLint configuration
+## 🛠️ Tech Stack
 
-If you are developing a production application, we recommend using TypeScript and enable type-aware lint rules. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+- **Frontend:** React, TailwindCSS, Vite
+- **AI Integration:** GroqAPI
+- **Backend (optional):** Node.js, Express, MongoDB (for user storage or document persistence)
 
-[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/HarithHadi/Smartdoc)
+## 📦 Installation
+
+Clone the repository:
+
+```bash
+git clone https://github.com/yourusername/smartdoc.git
+cd smartdoc
+```
+
+Install dependencies
+```
+npm install
+```
+
+
+🔐 Environment Variables
+Create a .env file in the root directory and add the following:
+```
+VITE_API_KEY=your_api_key_here
+```
